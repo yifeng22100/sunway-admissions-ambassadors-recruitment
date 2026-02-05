@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunway Open Day: Find Your Role</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Sunway Custom Colors */
+        .bg-sunway { background-color: #990000; }
+        .text-sunway { color: #990000; }
+        .border-sunway { border-color: #990000; }
+        .bg-sunway-light { background-color: #ffe6e6; }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+
+        .pulse-slow {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Option Card Interaction */
+        .option-card {
+            transition: all 0.2s ease;
+        }
+        .option-card:active {
+            transform: scale(0.98);
+            background-color: #f9fafb;
+        }
+        .option-card:hover {
+            border-color: #990000;
+            background-color: #fff5f5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">
+
+    <!-- MAIN CONTAINER -->
+    <div id="app-container" class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] relative flex flex-col">
+        
+        <!-- Header / Progress (Hidden on Welcome Screen) -->
+        <div id="header-bar" class="hidden px-6 pt-6 pb-2">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-xs font-semibold text-gray-400 tracking-wider">RECRUITMENT 2026</span>
+                <span id="progress-text" class="text-xs font-bold text-sunway">1/7</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                <div id="progress-bar" class="bg-sunway h-1.5 rounded-full transition-all duration-500 ease-out" style="width: 14%"></div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div id="content-area" class="flex-1 flex flex-col p-6 relative">
+            <!-- Dynamic content injected here -->
+        </div>
+
+        <!-- Footer (Static branding) -->
+        <div class="p-4 text-center border-t border-gray-100 text-gray-300 text-[10px] uppercase tracking-widest">
+            Sunway Open Day Recruitment
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA & CONFIG ---
+        
+        // Roles Configuration
+        const ROLES = {
+            AMB: { 
+                id: 'AMB', 
+                name: 'Student Ambassador', 
+                icon: 'fa-seedling', 
+                desc: 'Perfect for building confidence and meeting new people. You are the face of campus hospitality!',
+                growth: 'Section Leader / SAA'
+            },
+            SL: { 
+                id: 'SL', 
+                name: 'Section Leader', 
+                icon: 'fa-compass', 
+                desc: 'You show leadership potential! You will guide teams and handle parents.',
+                subtext: 'Requires Interview',
+                growth: 'Sunway Admissions Ambassador'
+            },
+            OD: { 
+                id: 'OD', 
+                name: 'OD Leader', 
+                icon: 'fa-crown', 
+                desc: 'For experienced leaders who know the flow inside out. You coordinate zones and solve problems.',
+                subtext: 'Recommendation & Full Commitment Required',
+                growth: 'Senior Leadership / SAA'
+            },
+            SAA: { 
+                id: 'SAA', 
+                name: 'Admissions Ambassador', 
+                icon: 'fa-building-columns', 
+                desc: 'A prestigious role representing Sunway in daily operations. Long-term commitment required.',
+                subtext: 'Interview + Assessment Required',
+                growth: 'Leadership within Admissions'
+            }
+        };
+
+        // Questions Data (Using the Logic discussed)
+        const questions = [
+            {
+                id: 1,
+                text: "Have you joined Sunway Open Day before?",
+                options: [
+                    { text: "No, this is my first time 🌱", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 } },
+                    { text: "Yes, once", scores: { AMB: 2, SL: 2, OD: 1, SAA: 0 } },
+                    { text: "Yes, a few times", scores: { AMB: 1, SL: 3, OD: 2, SAA: 1 } },
+                    { text: "Yes, I know the flow well 😎", scores: { AMB: 0, SL: 3, OD: 4, SAA: 2 } }
+                ]
+            },
+            {
+                id: 2,
+                text: "What interests you MOST about joining?",
+                options: [
+                    { text: "Gaining experience & confidence", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 } },
+                    { text: "Interacting with visitors & students", scores: { AMB: 2, SL: 2, OD: 1, SAA: 0 } },
+                    { text: "Leading or supporting a team", scores: { AMB: 1, SL: 3, OD: 2, SAA: 1 } },
+                    { text: "Learning office operations 🏢", scores: { AMB: 0, SL: 1, OD: 1, SAA: 4 } }
+                ]
+            },
+            {
+                id: 3,
+                text: "How comfortable are you handling parents?",
+                options: [
+                    { text: "Not confident yet, willing to learn", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 } },
+                    { text: "I can help with guidance", scores: { AMB: 2, SL: 2, OD: 1, SAA: 0 } },
+                    { text: "Confident handling enquiries", scores: { AMB: 1, SL: 3, OD: 3, SAA: 2 } },
+                    { text: "I enjoy being the first point of contact", scores: { AMB: 0, SL: 2, OD: 3, SAA: 4 } }
+                ]
+            },
+            {
+                id: 4,
+                text: "It's crowded and a lecturer is missing. You:",
+                options: [
+                    { text: "Wait for instructions", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 } },
+                    { text: "Try my best & ask for help", scores: { AMB: 2, SL: 2, OD: 1, SAA: 0 } },
+                    { text: "Calmly manage the visitors", scores: { AMB: 1, SL: 3, OD: 3, SAA: 2 } },
+                    { text: "Take charge & coordinate the team", scores: { AMB: 0, SL: 2, OD: 4, SAA: 4 } }
+                ]
+            },
+            {
+                id: 5,
+                text: "What is your availability for 2026?",
+                note: "Be honest! This helps us place you correctly.",
+                options: [
+                    { text: "One Open Day to try", scores: { AMB: 4, SL: 0, OD: 0, SAA: 0 }, gate: "block_od_saa" },
+                    { text: "A few Open Days", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 }, gate: "block_od_saa" },
+                    { text: "All Open Days (Apr, Jun, Aug, Dec)", scores: { AMB: 1, SL: 2, OD: 6, SAA: 0 }, gate: "allow_od" },
+                    { text: "Weekdays + Open Days (Long term)", scores: { AMB: 0, SL: 1, OD: 0, SAA: 7 }, gate: "allow_saa" }
+                ]
+            },
+            {
+                id: 6,
+                text: "Which environment suits you best?",
+                options: [
+                    { text: "Event-based & energetic", scores: { AMB: 3, SL: 1, OD: 0, SAA: 0 } },
+                    { text: "Team-based & customer facing", scores: { AMB: 2, SL: 2, OD: 1, SAA: 0 } },
+                    { text: "Leading & coordinating teams", scores: { AMB: 1, SL: 3, OD: 4, SAA: 1 } },
+                    { text: "Office operations + Events", scores: { AMB: 0, SL: 1, OD: 1, SAA: 6 } }
+                ]
+            },
+            {
+                id: 7,
+                text: "Finally, which opportunity sounds best?",
+                options: [
+                    { text: "🌱 Student Ambassador", scores: { AMB: 2, SL: 0, OD: 0, SAA: 0 } },
+                    { text: "🧭 Section Leader", scores: { AMB: 0, SL: 2, OD: 0, SAA: 0 } },
+                    { text: "👑 OD Leader", scores: { AMB: 0, SL: 0, OD: 2, SAA: 0 } },
+                    { text: "🏢 Admissions Ambassador (SAA)", scores: { AMB: 0, SL: 0, OD: 0, SAA: 2 } }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentStep = -1; // -1 = Welcome Screen
+        let scores = { AMB: 0, SL: 0, OD: 0, SAA: 0 };
+        let gates = { od_allowed: false, saa_allowed: false };
+
+        // --- DOM ELEMENTS ---
+        const container = document.getElementById('content-area');
+        const headerBar = document.getElementById('header-bar');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        // --- FUNCTIONS ---
+
+        function init() {
+            renderWelcome();
+        }
+
+        // 1. RENDER WELCOME SCREEN
+        function renderWelcome() {
+            headerBar.classList.add('hidden');
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center fade-in">
+                    <div class="w-20 h-20 bg-sunway-light rounded-full flex items-center justify-center mb-6 pulse-slow">
+                        <i class="fa-solid fa-users text-4xl text-sunway"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Find Your Role</h1>
+                    <p class="text-sunway font-semibold mb-6">Sunway Open Day Recruitment</p>
+                    <p class="text-gray-500 text-sm mb-8 leading-relaxed px-4">
+                        Not sure if you should apply for Ambassador, Section Leader, or SAA? 
+                        <br><br>
+                        Take this 1-minute quiz to find where you fit best. No experience required!
+                    </p>
+                    <button onclick="startQuiz()" class="w-full py-4 bg-sunway text-white rounded-xl font-bold shadow-lg transform transition active:scale-95 hover:bg-red-900">
+                        Start Quiz
+                    </button>
+                    <p class="mt-4 text-xs text-gray-400">Next Open Day: 11 & 12 April 2026</p>
+                </div>
+            `;
+        }
+
+        function startQuiz() {
+            currentStep = 0;
+            headerBar.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // 2. RENDER QUESTION SCREEN
+        function renderQuestion() {
+            const q = questions[currentStep];
+            
+            // Update Progress
+            const progressPercent = ((currentStep + 1) / questions.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            progressText.innerText = `${currentStep + 1}/${questions.length}`;
+
+            // Render Layout
+            container.innerHTML = `
+                <div class="flex flex-col h-full slide-up">
+                    <h2 class="text-xl font-bold text-gray-900 mb-2">${q.text}</h2>
+                    ${q.note ? `<p class="text-xs text-sunway font-medium mb-6 bg-red-50 p-2 rounded inline-block border border-red-100"><i class="fa-solid fa-circle-info mr-1"></i> ${q.note}</p>` : '<div class="mb-6"></div>'}
+                    
+                    <div class="space-y-3 flex-1 overflow-y-auto pb-4">
+                        ${q.options.map((opt, index) => `
+                            <button onclick="handleAnswer(${index})" class="option-card w-full text-left p-4 border-2 border-transparent bg-white shadow-sm rounded-xl flex items-center group">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mr-4 group-hover:bg-sunway group-hover:text-white transition-colors font-bold text-sm">
+                                    ${String.fromCharCode(65 + index)}
+                                </div>
+                                <span class="text-gray-700 font-medium text-sm flex-1">${opt.text}</span>
+                                <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-sunway"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 3. HANDLE ANSWER & LOGIC
+        function handleAnswer(optionIndex) {
+            const q = questions[currentStep];
+            const selectedOpt = q.options[optionIndex];
+
+            // Update Scores
+            for (const [role, points] of Object.entries(selectedOpt.scores)) {
+                scores[role] += points;
+            }
+
+            // Handle Gates (Logic from conversation)
+            if (selectedOpt.gate) {
+                if (selectedOpt.gate === 'block_od_saa') {
+                    // Logic: You cannot be OD or SAA if you can't commit
+                    // We handle this by NOT setting the allowed flags.
+                } else if (selectedOpt.gate === 'allow_od') {
+                    gates.od_allowed = true;
+                } else if (selectedOpt.gate === 'allow_saa') {
+                    gates.saa_allowed = true;
+                    // Usually SAA can also do OD, but strictly speaking specific commitment
+                    gates.od_allowed = true; 
+                }
+            }
+
+            // Next Step
+            if (currentStep < questions.length - 1) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                showCalculating();
+            }
+        }
+
+        // 4. SHOW CALCULATING STATE
+        function showCalculating() {
+            headerBar.classList.add('hidden');
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center fade-in">
+                    <div class="w-16 h-16 border-4 border-gray-200 border-t-sunway rounded-full animate-spin mb-6"></div>
+                    <h3 class="text-lg font-bold text-gray-800">Analyzing your fit...</h3>
+                    <p class="text-sm text-gray-500 mt-2">Matching your leadership style</p>
+                </div>
+            `;
+            setTimeout(calculateAndShowResult, 2000);
+        }
+
+        // 5. CALCULATE RESULT
+        function calculateAndShowResult() {
+            // APPLY GATES (Zero out scores if gates not met)
+            // Note: Even if they have high points, if they fail the commitment gate, they can't be primary
+            // However, we don't zero them completely, we just ensure they don't win.
+            // Actually, cleaner logic: If gate is closed, set score to -1 to ensure they don't win.
+            
+            if (!gates.od_allowed) scores.OD = -1;
+            if (!gates.saa_allowed) scores.SAA = -1;
+
+            // Find Winner
+            let maxScore = -100;
+            let primaryRole = 'AMB';
+
+            for (const [role, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    primaryRole = role;
+                }
+            }
+
+            // Fallback: If everything is -1 (unlikely), default to AMB
+            if (maxScore === -1) primaryRole = 'AMB';
+
+            // Find Secondary (Growth) Role
+            // Sort roles by score to find the runner up
+            let sortedRoles = Object.entries(scores)
+                .filter(([role]) => role !== primaryRole && scores[role] > -1) // Exclude winner and blocked roles
+                .sort((a, b) => b[1] - a[1]);
+            
+            // Hardcoded Logic for Growth Path based on the prompt's request
+            // If AMB -> Growth is SL or SAA
+            // If SL -> Growth is SAA
+            // If OD -> Growth is Senior Leadership
+            // If SAA -> Growth is Leadership
+            
+            // We use the static data from ROLES object for "Growth", 
+            // but we can make it dynamic if we want. Let's stick to the static text for consistency.
+
+            renderResult(primaryRole);
+        }
+
+        // 6. RENDER RESULT SCREEN
+        function renderResult(roleId) {
+            const roleData = ROLES[roleId];
+            const isAmbassador = roleId === 'AMB';
+
+            container.innerHTML = `
+                <div class="flex flex-col h-full slide-up relative">
+                    
+                    <!-- Result Card -->
+                    <div class="flex-1 flex flex-col items-center justify-center text-center p-2">
+                        <p class="text-xs uppercase tracking-widest text-gray-400 mb-4">Your Primary Role</p>
+                        
+                        <div class="w-24 h-24 bg-sunway rounded-full flex items-center justify-center mb-6 shadow-lg shadow-red-200">
+                            <i class="fa-solid ${roleData.icon} text-4xl text-white"></i>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">${roleData.name}</h2>
+                        ${roleData.subtext ? `<div class="mb-4 inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-[10px] font-bold uppercase tracking-wide border border-yellow-200">${roleData.subtext}</div>` : ''}
+                        
+                        <p class="text-sm text-gray-600 leading-relaxed max-w-xs mx-auto mb-6">
+                            ${roleData.desc}
+                        </p>
+
+                        <!-- Growth Card -->
+                        <div class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-left flex items-start">
+                            <div class="mt-1 mr-3 text-sunway opacity-50"><i class="fa-solid fa-chart-line"></i></div>
+                            <div>
+                                <p class="text-xs text-gray-400 font-bold uppercase mb-1">You may also grow into</p>
+                                <p class="text-sm font-semibold text-gray-800">${roleData.growth}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mt-4 space-y-3">
+                        <button class="w-full py-3 bg-sunway text-white rounded-xl font-bold shadow-lg transform transition active:scale-95 hover:bg-red-900 flex justify-center items-center">
+                            Sign Up as ${roleData.name} <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                        <button onclick="location.reload()" class="w-full py-3 bg-white text-gray-500 border border-gray-200 rounded-xl font-medium text-sm hover:bg-gray-50">
+                            Retake Quiz
+                        </button>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>
