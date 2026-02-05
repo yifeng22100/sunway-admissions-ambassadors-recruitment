@@ -101,14 +101,15 @@
     <script>
         // --- DATA & CONFIG ---
         
-        // Roles Configuration
+        // Roles Configuration with Specific Links
         const ROLES = {
             AMB: { 
                 id: 'AMB', 
                 name: 'Student Ambassador', 
                 icon: 'fa-seedling', 
                 desc: 'Perfect for building confidence and meeting new people. You are the face of campus hospitality!',
-                growth: 'Section Leader / SAA'
+                growth: 'Section Leader / SAA',
+                link: 'https://docs.google.com/forms/d/e/1FAIpQLSd-kdBRFaR899itcSaLGzk_PlL-9t5h4WqiVJb4PR7UiSB3yw/viewform?usp=dialog'
             },
             SL: { 
                 id: 'SL', 
@@ -116,7 +117,8 @@
                 icon: 'fa-compass', 
                 desc: 'You show leadership potential! You will guide teams and handle parents.',
                 subtext: 'Requires Interview',
-                growth: 'Sunway Admissions Ambassador'
+                growth: 'Sunway Admissions Ambassador',
+                link: 'https://docs.google.com/forms/d/e/1FAIpQLScojYiUvSNonhswcvPwY8Y238_7GVKEWwpj5wStZ4Jq3u0qbg/viewform?usp=dialog'
             },
             OD: { 
                 id: 'OD', 
@@ -124,7 +126,8 @@
                 icon: 'fa-crown', 
                 desc: 'For experienced leaders who know the flow inside out. You coordinate zones and solve problems.',
                 subtext: 'Recommendation & Full Commitment Required',
-                growth: 'Senior Leadership / SAA'
+                growth: 'Senior Leadership / SAA',
+                link: '#' // PLACEHOLDER LINK for OD Leader
             },
             SAA: { 
                 id: 'SAA', 
@@ -132,7 +135,8 @@
                 icon: 'fa-building-columns', 
                 desc: 'A prestigious role representing Sunway in daily operations. Long-term commitment required.',
                 subtext: 'Interview + Assessment Required',
-                growth: 'Leadership within Admissions'
+                growth: 'Leadership within Admissions',
+                link: 'https://docs.google.com/forms/d/e/1FAIpQLScGNtZWyamdJK34PE-q0IFvWVjk84nftyYk2vX_FN4mzvRtUA/viewform?usp=dialog'
             }
         };
 
@@ -380,6 +384,9 @@
             const roleData = ROLES[roleId];
             const isAmbassador = roleId === 'AMB';
 
+            // Check if link is a placeholder to prevent opening blank tab
+            const linkAction = roleData.link === '#' ? "alert('Registration link coming soon!')" : `window.open('${roleData.link}', '_blank')`;
+
             container.innerHTML = `
                 <div class="flex flex-col h-full slide-up relative">
                     
@@ -410,7 +417,7 @@
 
                     <!-- Actions -->
                     <div class="mt-4 space-y-3">
-                        <button class="w-full py-3 bg-sunway text-white rounded-xl font-bold shadow-lg transform transition active:scale-95 hover:bg-red-900 flex justify-center items-center">
+                        <button onclick="${linkAction}" class="w-full py-3 bg-sunway text-white rounded-xl font-bold shadow-lg transform transition active:scale-95 hover:bg-red-900 flex justify-center items-center">
                             Sign Up as ${roleData.name} <i class="fa-solid fa-arrow-right ml-2"></i>
                         </button>
                         <button onclick="location.reload()" class="w-full py-3 bg-white text-gray-500 border border-gray-200 rounded-xl font-medium text-sm hover:bg-gray-50">
