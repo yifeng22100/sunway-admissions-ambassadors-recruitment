@@ -12,6 +12,11 @@
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
             -webkit-tap-highlight-color: transparent;
+            /* Prevent text selection */
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         
         /* Sunway Custom Colors */
@@ -21,53 +26,35 @@
         .bg-sunway-light { background-color: #ffe6e6; }
 
         /* Animation Classes */
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-        }
-        
-        .slide-up {
-            animation: slideUp 0.4s ease-out forwards;
-        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .slide-up { animation: slideUp 0.4s ease-out forwards; }
+        .pulse-slow { animation: pulse 2s infinite; }
 
-        .pulse-slow {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Option Card Interaction */
-        .option-card {
-            transition: all 0.2s ease;
-        }
-        .option-card:active {
-            transform: scale(0.98);
-            background-color: #f9fafb;
-        }
-        .option-card:hover {
-            border-color: #990000;
-            background-color: #fff5f5;
-        }
+        .option-card { transition: all 0.2s ease; }
+        .option-card:active { transform: scale(0.98); background-color: #f9fafb; }
+        .option-card:hover { border-color: #990000; background-color: #fff5f5; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
     </style>
+
+    <!-- 🛡️ ANTI-COPY PROTECTION SCRIPT -->
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { return false; } // F12
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } // Ctrl+Shift+I
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } // Ctrl+Shift+J
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } // Ctrl+U
+            if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) { return false; } // Ctrl+S
+        }
+    </script>
 </head>
 <body class="flex items-center justify-center min-h-screen bg-gray-100 text-gray-800 p-4">
 
@@ -305,12 +292,10 @@
             if (selectedOpt.gate) {
                 if (selectedOpt.gate === 'block_od_saa') {
                     // Logic: You cannot be OD or SAA if you can't commit
-                    // We handle this by NOT setting the allowed flags.
                 } else if (selectedOpt.gate === 'allow_od') {
                     gates.od_allowed = true;
                 } else if (selectedOpt.gate === 'allow_saa') {
                     gates.saa_allowed = true;
-                    // Usually SAA can also do OD, but strictly speaking specific commitment
                     gates.od_allowed = true; 
                 }
             }
@@ -339,11 +324,6 @@
 
         // 5. CALCULATE RESULT
         function calculateAndShowResult() {
-            // APPLY GATES (Zero out scores if gates not met)
-            // Note: Even if they have high points, if they fail the commitment gate, they can't be primary
-            // However, we don't zero them completely, we just ensure they don't win.
-            // Actually, cleaner logic: If gate is closed, set score to -1 to ensure they don't win.
-            
             if (!gates.od_allowed) scores.OD = -1;
             if (!gates.saa_allowed) scores.SAA = -1;
 
@@ -358,23 +338,7 @@
                 }
             }
 
-            // Fallback: If everything is -1 (unlikely), default to AMB
             if (maxScore === -1) primaryRole = 'AMB';
-
-            // Find Secondary (Growth) Role
-            // Sort roles by score to find the runner up
-            let sortedRoles = Object.entries(scores)
-                .filter(([role]) => role !== primaryRole && scores[role] > -1) // Exclude winner and blocked roles
-                .sort((a, b) => b[1] - a[1]);
-            
-            // Hardcoded Logic for Growth Path based on the prompt's request
-            // If AMB -> Growth is SL or SAA
-            // If SL -> Growth is SAA
-            // If OD -> Growth is Senior Leadership
-            // If SAA -> Growth is Leadership
-            
-            // We use the static data from ROLES object for "Growth", 
-            // but we can make it dynamic if we want. Let's stick to the static text for consistency.
 
             renderResult(primaryRole);
         }
@@ -385,7 +349,7 @@
             const isAmbassador = roleId === 'AMB';
 
             // Check if link is a placeholder to prevent opening blank tab
-            const linkAction = roleData.link === '#' ? "alert('Registration link coming soon!')" : `window.open('${roleData.link}', '_blank')`;
+            const linkAction = roleData.link === '#' ? "alert('Registration link coming soon! Please check back later.')" : `window.open('${roleData.link}', '_blank')`;
 
             container.innerHTML = `
                 <div class="flex flex-col h-full slide-up relative">
